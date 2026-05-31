@@ -147,12 +147,12 @@ async def main():
     except TonWalletLowBalanceExc as e:
         print(e, e.current_balance, e.required_balance)
 
-        # Закрываем httpx.AsyncClient и TonApiClient сессии
-        await client.close()
+    # Закрываем httpx.AsyncClient и TonApiClient сессии
+    await client.close()
 
 
 if __name__ == '__main__':
     import asyncio
-
+    
     asyncio.run(main())
 ```
