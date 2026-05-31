@@ -9,7 +9,7 @@ from fragment_sdk.types.exception import FragmentSdkExc
 from fragment_sdk._clients.wallet import TonWalletClient
 from fragment_sdk._clients.http import HttpClient
 from fragment_sdk._methods.buy_stars import buy_stars
-from fragment_sdk._methods.cookie import get_cookies
+from fragment_sdk._methods.cookie import get_client_cookies
 from fragment_sdk import const
 
 
@@ -25,16 +25,20 @@ class FragmentClient:
             stel_dt: str,
             stel_ton_token: str,
             stel_token: str,
-            wallet_version: Literal['V4R2', 'V5R1'] = "V5R1",
+            wallet_version: const.WALLET_VERSION_TYPE = const.DEFAULT_WALLET_VERSION,
+            # payment_method: const.FRAGMENT_PAYMENT_METHOD_TYPE = const.DEFAULT_FRAGMENT_PAYMENT_METHOD
     ):
         self._api_key = api_key
         self._seed = seed
         self._cookies = {
             'stel_ssid': stel_ssid,
             'stel_dt': stel_dt,
-            'stel_ton_token': stel_token,
-            'stel_token': stel_ton_token
+            'stel_ton_token': stel_ton_token,
+            'stel_token': stel_token
         }
+
+        # Пока заглушка
+        self.payment_method = 'ton'
 
         self.ton_wallet_client = TonWalletClient(
             api_key=self._api_key,
@@ -86,22 +90,35 @@ class FragmentClient:
 
             self.http_client = HttpClient(
                 cookies=self._cookies,
-                url=const.get_fragment_api_base_url(self.account_info['hash'])
+                _hash=self.account_info['hash']
             )
 
             await self.ton_wallet_client.async_init()
             self.__async_init = True
 
     @staticmethod
-    async def get_cookies() -> dict:
-        return get_cookies()
+    def get_cookies() -> dict:
+        return get_client_cookies()
+
+    @_require_init
+    async def close(self):
+        await self.http_client.close()
+        await self.ton_wallet_client.close()
 
     # ------------ MAIN METHODS ------------ #
     @_require_init
-    async def buy_stars(self, username: str, quantity: int, show_sender: bool = False) -> BuyStarsDto:
+    async def buy_stars(
+            self,
+            username: str,
+            quantity: int,
+            show_sender: bool = False,
+            # payment_method: const.FRAGMENT_PAYMENT_METHOD_TYPE | None = None
+    ) -> BuyStarsDto:
         return await buy_stars(
             client=self,
             username=username,
             quantity=quantity,
-            show_sender=show_sender
+            show_sender=show_sender,
+            # Пока заглушка
+            payment_method='ton'
         )

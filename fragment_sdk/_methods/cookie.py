@@ -43,7 +43,6 @@ with sync_playwright() as p:
         for c in cookies
         if domain in c["domain"]
     }
-
     Path(output_file).write_text(json.dumps(result))
 """
 
@@ -84,7 +83,7 @@ def _install_playwright():
 
 
 def _parse_cookies() -> dict:
-    print("(2) Войдите на сайт, чтобы получить cookie")
+    print("(2) Войдите на сайт и подключите кошелек, чтобы получить cookie")
 
     if os.name == "nt":
         python_bin = VENV_DIR / "Scripts" / "python.exe"
@@ -121,7 +120,7 @@ def _uninstall_playwright():
     print("\t(3.1) Все скачанные библиотеки успешно удалены!")
 
 
-def get_cookies() -> dict:
+def get_client_cookies() -> dict:
     try:
         _install_playwright()
         cookies = _parse_cookies()

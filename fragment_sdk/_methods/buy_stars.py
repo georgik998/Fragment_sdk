@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 async def get_recipient(username: str, quantity: int, client: 'FragmentClient') -> str:
     try:
         response = await client.http_client.post(
+            url='/api',
             data={
                 "query": username,
                 "quantity": quantity,
@@ -23,19 +24,26 @@ async def get_recipient(username: str, quantity: int, client: 'FragmentClient') 
     except (HttpExc, ValueError):
         raise FragmentMethodExc(method='buy_stars', stage='get_recipient', detail='http_request_error')
 
-    recipient = data.get("found", {}).get('recipient')
+    recipient = data.get('found', {}).get('recipient')
     if recipient is None:
         raise FragmentMethodExc(method='buy_stars', stage='get_recipient', detail='parse_error')
     return recipient
 
 
-async def get_request_id(recipient: str, quantity: int, client: 'FragmentClient') -> str:
+async def get_request_id(
+        recipient: str,
+        quantity: int,
+        payment_method: const.FRAGMENT_PAYMENT_METHOD_TYPE,
+        client: 'FragmentClient'
+) -> str:
     try:
         response = await client.http_client.post(
+            url='/api',
             data={
                 "recipient": recipient,
                 "quantity": quantity,
-                "method": "initBuyStarsRequest"
+                "method": "initBuyStarsRequest",
+                "payment_method": payment_method
             }
         )
         data = response.json()
@@ -61,6 +69,7 @@ async def get_buy_data(
     })
     try:
         response = await client.http_client.post(
+            url='/api',
             data={
                 "account": json.dumps(client.ton_wallet_client.account_info),
                 "device": const.DEVICE_HEADERS,
@@ -74,17 +83,17 @@ async def get_buy_data(
         data = response.json()
     except (HttpExc, ValueError):
         raise FragmentMethodExc(method='buy_stars', stage='get_buy_data', detail='http_request_error')
-
-    if data.get('transaction', {}).get('message') is None:
+    if data.get('transaction', {}).get('messages') is None:
         raise FragmentMethodExc(method='buy_stars', stage='get_buy_data', detail='parse_error')
-    return data
+    return data['transaction']
 
 
 async def buy_stars(
         client: 'FragmentClient',
         username: str,
         quantity: int,
-        show_sender: bool
+        show_sender: bool,
+        payment_method: const.FRAGMENT_PAYMENT_METHOD_TYPE | None
 ) -> BuyStarsDto:
     recipient = await get_recipient(
         username=username,
@@ -94,7 +103,8 @@ async def buy_stars(
     request_id = await get_request_id(
         recipient=recipient,
         quantity=quantity,
-        client=client
+        client=client,
+        payment_method=payment_method if payment_method is not None else client.payment_method
     )
     buy_data = await get_buy_data(
         show_sender=show_sender,

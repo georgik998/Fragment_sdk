@@ -17,6 +17,7 @@
 ## Какие действия с платформой системы сейчас поддерживаются ?
 
 - Покупка звезд
+- **Поддержка различных сетей для оплаты покупок на fragment находится в разработке**
 
 ## ⚙️ Стек
 
@@ -56,14 +57,14 @@ from fragment_sdk.types.exception import FragmentSdkExc
 
 Для работы с библиотекой требуются следующие данные:
 
-| Параметр         | Description                                         |
-|------------------|-----------------------------------------------------|
-| `seed`           | сид фраза кошелька из 24 слов                       |
-| `api_key`        | апи ключ  [tonconsole.com](https://tonconsole.com)  |
-| `stel_ssid`      | fragment cookie с названием: `stel_ssid`            |
-| `stel_token`     | fragment cookie с названием: `stel_token`           |
-| `stel_dt`        | fragment cookie с названием: `stel_dt`              |
-| `stel_ton_token` | fragment cookie с названием: `stel_ton_token`       |
+| Параметр         | Description                                        |
+|------------------|----------------------------------------------------|
+| `seed`           | сид фраза кошелька из 24 слов                      |
+| `api_key`        | апи ключ  [tonconsole.com](https://tonconsole.com) |
+| `stel_ssid`      | fragment cookie с названием: `stel_ssid`           |
+| `stel_token`     | fragment cookie с названием: `stel_token`          |
+| `stel_dt`        | fragment cookie с названием: `stel_dt`             |
+| `stel_ton_token` | fragment cookie с названием: `stel_ton_token`      |
 
 **1. Fragment cookies**
 
@@ -73,8 +74,10 @@ from fragment_sdk.types.exception import FragmentSdkExc
 
 - **Автоматические** (рекомендуется) — вызовите метод `get_cookies()` у класса `FragmentClient`
 
-  У вас откроется окно браузера, где нужно будет войти в свой аккаунт фрагмента, после чего нажать Enter в консоли откуда 
-  
+  У вас откроется окно браузера, где нужно будет войти в свой аккаунт фрагмента и подключить кошелек
+  (**важно, используйте аккаунт и кошелек с которых планируете совершать покупки в дальнейшем**),
+  после чего нажать Enter в консоли откуда
+
   запускали скрипт по получению кук
   ```python
   from fragment_sdk import FragmentClient
@@ -82,20 +85,20 @@ from fragment_sdk.types.exception import FragmentSdkExc
   
   try:
     cookies = FragmentClient.get_cookies()
-    print(cookies)
+    print("Ваши куки для вставки:\n", "\n".join(f"{key}={value}" for key, value in cookies.items()))
   except CookieExc:
     print('Ошибка во время получения кук, попробуйте ручной способ')
   ```
-  
-- **Ручной** — установите расширение [Cookie Editor](https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) и возьмите куки со следующими названиями:
-  
-  `stel_ssid`, `stel_dt`, `stel_token`, `stel_ton_token`
 
+- **Ручной** — установите
+  расширение [Cookie Editor](https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) и
+  возьмите куки со следующими названиями:
+
+  `stel_ssid`, `stel_dt`, `stel_token`, `stel_ton_token`
 
 **2. Tonapi key** — получите на  [tonconsole.com](https://tonconsole.com).
 
 **3. Seed phrase** - сид фраза кошелька состоящая из 24 слов
-
 
 ## Быстрый старт на примере покупки звезд
 
@@ -128,7 +131,7 @@ async def main():
     try:
         await client.async_init()
     except FragmentSdkExc as e:
-        print(e.message)
+        print(e, e.message)
 
     try:
         from fragment_sdk.types.dto import BuyStarsDto
@@ -140,12 +143,12 @@ async def main():
         )
         print(result)
     except FragmentMethodExc as e:
-        print(e.message, e.stage, e.method, e.detail)
+        print(e, e.message, e.stage, e.method, e.detail)
     except TonWalletLowBalanceExc as e:
-        print(e.current_balance, e.required_balance)
+        print(e, e.current_balance, e.required_balance)
 
-    # Закрываем httpx.AsyncClient сессию
-    await client.http_client.close()
+        # Закрываем httpx.AsyncClient и TonApiClient сессии
+        await client.close()
 
 
 if __name__ == '__main__':

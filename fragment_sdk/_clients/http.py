@@ -1,5 +1,7 @@
 import httpx
 
+from fragment_sdk.const import FRAGMENT_BASE_URL
+
 
 class HttpExc(Exception):
 
@@ -31,10 +33,13 @@ class HttpExc(Exception):
 
 class HttpClient:
 
-    def __init__(self, cookies: dict, url: str):
+    def __init__(self, cookies: dict, _hash: str, url: str = FRAGMENT_BASE_URL):
         self.httpx_client = httpx.AsyncClient(
             cookies=cookies,
-            base_url=url
+            base_url=url,
+            params={
+                'hash': _hash
+            }
         )
 
     async def close(self):
