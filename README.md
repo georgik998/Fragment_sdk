@@ -83,7 +83,7 @@ from fragment_sdk.types.exception import FragmentSdkExc
   
   try:
       cookies = FragmentClient.get_cookies()
-      print("Ваши куки для вставки:\n", "\n".join(f"{key}={value}" for key, value in cookies.items()))
+      print("Ваши куки для вставки:\n" + "\n".join(f"{key}={value}" for key, value in cookies.items()))
   except CookieExc:
       print('Ошибка во время получения кук, попробуйте ручной способ')
   ```
