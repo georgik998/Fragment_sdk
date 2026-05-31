@@ -7,7 +7,7 @@ class FragmentSdkExc(Exception):
         super().__init__(self.message)
 
 
-class FragmentMethodExc(FragmentSdkExc):
+class MethodExc(FragmentSdkExc):
     def __init__(
             self,
             method: Literal[
@@ -22,6 +22,13 @@ class FragmentMethodExc(FragmentSdkExc):
         self.detail = detail
         message = f"Error during '{method}' at stage '{stage}', detail='{detail}'"
         super().__init__(message)
+
+
+class VerifyExc(FragmentSdkExc):
+
+    def __init__(self, method: Literal['buy_stars', 'buy_premium']):
+        self.method = method
+        super().__init__(message=f"Can't complete '{method}', fragment account is unverified")
 
 
 class TonWalletLowBalanceExc(FragmentSdkExc):

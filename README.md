@@ -76,23 +76,21 @@ from fragment_sdk.types.exception import FragmentSdkExc
 
   У вас откроется окно браузера, где нужно будет войти в свой аккаунт фрагмента и подключить кошелек
   (**важно, используйте аккаунт и кошелек с которых планируете совершать покупки в дальнейшем**),
-  после чего нажать Enter в консоли откуда
-
-  запускали скрипт по получению кук
+  после чего нажать Enter в консоли откуда запускали скрипт по получению кук
   ```python
   from fragment_sdk import FragmentClient
   from fragment_sdk.types.exception import CookieExc
   
   try:
-    cookies = FragmentClient.get_cookies()
-    print("Ваши куки для вставки:\n", "\n".join(f"{key}={value}" for key, value in cookies.items()))
+      cookies = FragmentClient.get_cookies()
+      print("Ваши куки для вставки:\n", "\n".join(f"{key}={value}" for key, value in cookies.items()))
   except CookieExc:
-    print('Ошибка во время получения кук, попробуйте ручной способ')
+      print('Ошибка во время получения кук, попробуйте ручной способ')
   ```
 
 - **Ручной** — установите
-  расширение [Cookie Editor](https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) и
-  возьмите куки со следующими названиями:
+  расширение [Cookie Editor](https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm), зайдите на [fragment.com](https://fragment.com), 
+  подключите кошелек, войдите в аккаунт и возьмите куки со следующими названиями:
 
   `stel_ssid`, `stel_dt`, `stel_token`, `stel_ton_token`
 
@@ -104,7 +102,7 @@ from fragment_sdk.types.exception import FragmentSdkExc
 
 ```python
 from fragment_sdk import FragmentClient
-from fragment_sdk.types.exception import FragmentSdkExc, FragmentMethodExc, TonWalletLowBalanceExc
+from fragment_sdk.types.exception import FragmentSdkExc, MethodExc, TonWalletLowBalanceExc, VerifyExc
 
 STEL_SSID = input('Введите stel_ssid из cookie фрагмента:\n')
 STEL_TOKEN = input('Введите stel_token из cookie фрагмента:\n')
@@ -142,10 +140,12 @@ async def main():
             show_sender=False
         )
         print(result)
-    except FragmentMethodExc as e:
+    except MethodExc as e:
         print(e, e.message, e.stage, e.method, e.detail)
     except TonWalletLowBalanceExc as e:
         print(e, e.current_balance, e.required_balance)
+    except VerifyExc as e:
+        print(e)
 
     # Закрываем httpx.AsyncClient и TonApiClient сессии
     await client.close()
@@ -153,6 +153,7 @@ async def main():
 
 if __name__ == '__main__':
     import asyncio
-    
+
     asyncio.run(main())
+
 ```

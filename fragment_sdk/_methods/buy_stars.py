@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 import json
 
-from fragment_sdk.types.exception import FragmentMethodExc
+from fragment_sdk.types.exception import MethodExc, VerifyExc
 from fragment_sdk.types.dto import BuyStarsDto
 from fragment_sdk._clients.http import HttpExc
 from fragment_sdk import const
@@ -22,11 +22,11 @@ async def get_recipient(username: str, quantity: int, client: 'FragmentClient') 
         )
         data = response.json()
     except (HttpExc, ValueError):
-        raise FragmentMethodExc(method='buy_stars', stage='get_recipient', detail='http_request_error')
+        raise MethodExc(method='buy_stars', stage='get_recipient', detail='http_request_error')
 
     recipient = data.get('found', {}).get('recipient')
     if recipient is None:
-        raise FragmentMethodExc(method='buy_stars', stage='get_recipient', detail='parse_error')
+        raise MethodExc(method='buy_stars', stage='get_recipient', detail='parse_error')
     return recipient
 
 
@@ -48,11 +48,11 @@ async def get_request_id(
         )
         data = response.json()
     except (HttpExc, ValueError):
-        raise FragmentMethodExc(method='buy_stars', stage='get_request_id', detail='http_request_error')
+        raise MethodExc(method='buy_stars', stage='get_request_id', detail='http_request_error')
 
     request_id = data.get("req_id")
     if request_id is None:
-        raise FragmentMethodExc(method='buy_stars', stage='get_request_id', detail='parse_error')
+        raise MethodExc(method='buy_stars', stage='get_request_id', detail='parse_error')
     return request_id
 
 
@@ -82,9 +82,11 @@ async def get_buy_data(
         )
         data = response.json()
     except (HttpExc, ValueError):
-        raise FragmentMethodExc(method='buy_stars', stage='get_buy_data', detail='http_request_error')
+        raise MethodExc(method='buy_stars', stage='get_buy_data', detail='http_request_error')
+    if data.get('need_verify') is True:
+        raise VerifyExc(method='buy_stars')
     if data.get('transaction', {}).get('messages') is None:
-        raise FragmentMethodExc(method='buy_stars', stage='get_buy_data', detail='parse_error')
+        raise MethodExc(method='buy_stars', stage='get_buy_data', detail='parse_error')
     return data['transaction']
 
 
